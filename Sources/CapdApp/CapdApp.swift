@@ -52,11 +52,14 @@ struct CapdApp: App {
         URL(string: "https://github.com/jamiedavenport/capd/releases")!
 
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
-    @State private var state = AppState()
+    @State private var state: AppState
 
     init() {
+        // Built eagerly: on the macOS 27 SDK a defaulted @State is lazy, so reading it here
+        // made a second AppState, and with it a second set of hotkeys, panels and captures.
+        let state = AppState()
+        _state = State(initialValue: state)
         AgentBootstrap.installAgent()
-        let state = self.state
         delegate.openURLs = { state.capture(handoffs: $0) }
     }
 
